@@ -13,13 +13,21 @@ proceedings <- tibble(
   url = proceeding_links %>% html_attr("href"),
   text = proceeding_links %>% html_text2()
 ) %>%
-  extract(text, c("day", "date"), regex = "Day ([0-9]{1,2}) - ([A-Za-z]* [0-9]{1,2}, [0-9]{4})", convert = TRUE) %>%
+  extract(text, c("day", "date_raw"), regex = "Day ([0-9]{1,2}) - ([A-Za-z]* [0-9]{1,2}, [0-9]{4})", convert = TRUE) %>%
+  mutate(date = mdy(date_raw)) %>%
   filter(! is.na(date)) %>%
   mutate(
-    transcript_filename = glue("POEC-Public-Hearings-Volume-{day}-{date %>% str_remove_all(., ',') %>% str_replace_all(., ' ', '-')}.pdf"),
+    transcript_filename = glue("POEC-Public-Hearings-Volume-{day}-{date_raw %>% str_remove_all(., ',') %>% str_replace_all(., ' ', '-')}.pdf"),
     transcript_url = glue("https://publicorderemergencycommission.ca/files/documents/Transcripts/{transcript_filename}")
   )
 
-transcripts <- proceedings %>%
-  filter(mdy(date) != today()) %>% # transcripts aren't ready day-of (understandably!)
+transcripts_raw <- proceedings %>%
+  filter(date != today()) %>% # transcripts aren't ready day-of (understandably!)
+  select(day, date, transcript_url) %>%
   mutate(transcript = map(transcript_url, pdf_text))
+
+transcripts <- transcripts_raw %>%
+  select(-transcript_url, -date) %>%
+  group_by(day) %>%
+  unnest(c(transcript)) %>%
+  mutate(page = row_number())
