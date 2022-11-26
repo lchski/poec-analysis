@@ -70,7 +70,7 @@ lines <- lines_raw %>%
       str_detect(text, "^[0-9]{1,2} --- Upon commencing") ~ "proceedings_start",
       str_detect(text, "^[0-9]{1,2} --- Upon") ~ "time_marker",
       str_detect(text, "^[0-9]{1,2} --- [A-Z]") ~ "section_header",
-      str_detect(text, "^[0-9]{1,2} [A-ZÈÉ\\.eci/ \\-'’(?:van)(?:den)(?:Mme)]*:") ~ "speaker_start",
+      str_detect(text, "^[0-9]{1,2} [A-ZÈÉ\\.eci/ \\-'’(?:van)(?:den)(?:Mme)(?:Del)]*:") ~ "speaker_start",
       TRUE ~ "other"
     ),
     line_type = case_when(# corrections based on errors found during speaker standardization
@@ -215,6 +215,11 @@ lines <- lines_raw %>%
   fill(section_header, .direction = "down") %>%
   ungroup() %>%
   select(day:text, page_type, line_type, page_header, page_subheader, section_header, speaker, speaker_standardized)
+
+# for debuggnig, confirm there are no duplicate names (typos, title inconsistencies etc)
+lines %>%
+  count(speaker_standardized) %>%
+  View("speaker_standardized_count")
 
 testimony <- lines %>%
   filter(
