@@ -220,6 +220,7 @@ lines <- lines_raw %>%
   select(line_id, day:text, page_type, line_type, page_header, page_subheader, section_header, speaker, speaker_standardized)
 
 # extend `line_type==proceedings_end` to lines after the `proceedings_end` for a day's testimony
+# NB: I don't love this approach of rewriting a variable based on its own value (since it can cause effects if the script isn't re-run top-to-bottom), but it's good enough for now
 lines <- lines %>% left_join(
     lines %>%
       filter(line_type == "proceedings_end") %>%
