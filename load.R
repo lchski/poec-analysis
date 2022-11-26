@@ -4,7 +4,6 @@ library(pdftools)
 
 library(lubridate)
 library(rvest)
-library(glue)
 
 proceeding_links <- read_html("https://publicorderemergencycommission.ca/public-hearings/") %>%
   html_elements(xpath = "//a[starts-with(@href, 'https://publicorderemergencycommission.ca/public-hearings/day')]")
@@ -17,8 +16,8 @@ proceedings <- tibble(
   mutate(date = mdy(date_raw)) %>%
   filter(! is.na(date)) %>%
   mutate(
-    transcript_filename = glue("POEC-Public-Hearings-Volume-{day}-{date_raw %>% str_remove_all(., ',') %>% str_replace_all(., ' ', '-')}.pdf"),
-    transcript_url = glue("https://publicorderemergencycommission.ca/files/documents/Transcripts/{transcript_filename}")
+    transcript_filename = str_glue("POEC-Public-Hearings-Volume-{day}-{date_raw %>% str_remove_all(., ',') %>% str_replace_all(., ' ', '-')}.pdf"),
+    transcript_url = str_glue("https://publicorderemergencycommission.ca/files/documents/Transcripts/{transcript_filename}")
   )
 
 rm(proceeding_links)
@@ -238,7 +237,7 @@ testimony %>%
     speaker_standardized = if_else(speaker_standardized == "none", NA_character_, speaker_standardized)
   ) %>%
   mutate(text_clean = case_when(
-    line_type == "speaker_start" ~ str_remove(text_clean, glue("^{speaker}: ?")),
+    line_type == "speaker_start" ~ str_remove(text_clean, str_glue("^{speaker}: ?")),
     TRUE ~ text_clean
   ))
 
