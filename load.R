@@ -132,7 +132,8 @@ lines <- lines_raw %>%
       "^mayer" = "mayor",
       "^ministre " = "minister ",
       "^supt " = "supt. ",
-      "^dpm " = "deputy pm "
+      "^dpm " = "deputy pm ",
+      "^premier ministre" = "prime minister"
     )),
     speaker_standardized = str_replace_all(speaker_standardized, c(
       "cynthia termorhuizen|cynthia termoshuizen" = "cynthia termorshuizen",
@@ -162,6 +163,7 @@ lines <- lines_raw %>%
       "emelie taman|emily taman" = "emilie taman",
       "ds\\.? jacqueline bodgen|ds jacqueline bogden" = "jacqueline bogden", # remove title, though maybe we'll re-add for consistency with DMs / ADMs? (same with Charette, Thomas, ...?)
       "eric brosseau" = "eric brousseau",
+      "eva chipuik" = "eva chipiuk",
       "graham reader" = "graham reeder",
       "guillame sirois-gingras|guillaume sirois gingras" = "guillaume sirois-gingras",
       "hana laura yanamoto" = "hana laura yamamoto",
@@ -188,8 +190,9 @@ lines <- lines_raw %>%
       "natalia rodgriguez|natalia rodiguez|natalia rodriguiez|nathalia rodriguez" = "natalia rodriguez",
       "^paul cham$" = "paul champ",
       "rob kitteredge|rob kittridge" = "rob kittredge",
+      "robert mckinnon" = "robert mackinnon",
       "swerge arpin" = "serge arpin",
-      "shontana chaudhury" = "shantona chaudhury",
+      "shontana chaudhury|shantona chsudhury" = "shantona chaudhury",
       "steeve chartrand" = "steeve charland",
       "stephen armstong" = "stephen armstrong",
       "steven aylward" = "stephen aylward",
