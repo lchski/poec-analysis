@@ -66,6 +66,7 @@ lines <- lines_raw %>%
     line_type = case_when(
       line == 1 ~ "page_header",
       text == fixed("INTERNATIONAL REPORTING INC.") ~ "page_footer",
+      str_detect(text, "^[0-9]{1,2} C E R T I F I C A T I O N") ~ "proceedings_end",
       str_detect(text, "^[0-9]{1,2} --- Upon commencing") ~ "proceedings_start",
       str_detect(text, "^[0-9]{1,2} --- Upon") ~ "time_marker",
       str_detect(text, "^[0-9]{1,2} --- [A-Z]") ~ "section_header",
