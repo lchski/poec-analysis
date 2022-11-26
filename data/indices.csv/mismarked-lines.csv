@@ -1,0 +1,4 @@
+day,page,line,error
+28,168,21,Previous witness testimony spills into speaker_start.
+20,34,4,Typo '[' at start of line.
+1,94,11,Categorized as speaker_start; actually continuation of section_header from previous line.
