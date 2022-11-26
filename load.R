@@ -21,6 +21,8 @@ proceedings <- tibble(
     transcript_url = glue("https://publicorderemergencycommission.ca/files/documents/Transcripts/{transcript_filename}")
   )
 
+rm(proceeding_links)
+
 transcripts_raw <- proceedings %>%
   filter(date != today()) %>% # transcripts aren't ready day-of (understandably!)
   select(day, date, transcript_url) %>%
@@ -51,8 +53,19 @@ lines_raw %>%
   write_csv("data/out/lines-raw.csv")
 
 lines <- lines_raw %>%
+  arrange(day, page, line) %>%
+  mutate(page_type = case_when(
+    line == 1 & text == "Public Hearing Audience publique" ~ "title",
+    line == 1 & str_detect(text, "^[0-9]{1,3}") ~ "testimony",
+    line == 1 & str_detect(text, "^[IV]{1,3}") ~ "front_matter",
+    line == 1 ~ "other",
+    TRUE ~ NA_character_
+  )) %>%
+  group_by(day, page) %>%
+  fill(page_type, .direction = "down") %>%
   mutate(
     line_type = case_when(
+      line == 1 ~ "page_header",
       text == fixed("INTERNATIONAL REPORTING INC.") ~ "page_footer",
       str_detect(text, "^[0-9]{1,2} --- Upon commencing") ~ "proceedings_start",
       str_detect(text, "^[0-9]{1,2} --- Upon") ~ "time_marker",
@@ -61,6 +74,8 @@ lines <- lines_raw %>%
       TRUE ~ "other"
     ),
     line_type = case_when(# corrections based on errors found during speaker standardization
+      day == 30 & page == 220 & str_detect(text, fixed("15 Finance:")) ~ "other",
+      day == 30 & page == 167 & str_detect(text, fixed("15 ---EXAMINATION IN-CHIEF BY MS. SHANTONA CHAUDHURY:")) ~ "section_header",
       day == 28 & page == 197 & str_detect(text, fixed("7 MR. VIGNEAULT")) ~ "other",
       day == 27 & page == 294 & str_detect(text, fixed("18 And Canada:")) ~ "other",
       day == 26 & page == 84 & str_detect(text, fixed("20 And:")) ~ "other",
@@ -72,15 +87,35 @@ lines <- lines_raw %>%
       day == 1 & page == 73 & str_detect(text, fixed("18 SHEPPARD:")) ~ "section_header",
       day == 1 & page == 94 & str_detect(text, fixed("10 BY MR. DAN SHEPPARD:")) ~ "section_header",
       TRUE ~ line_type
+    ),
+    line_type = case_when(
+      page_type == "testimony" & line_type == "other" & str_detect(text, "^[0-9]{1,2}") ~ "testimony",
+      TRUE ~ line_type
     )
   ) %>%
+  extract(text, into = c("page_header"), "[0-9]{1,3} (.*)", remove = FALSE) %>%
+  mutate(page_header = case_when(
+    page_type == "testimony" & line_type == "page_header" ~ page_header,
+    TRUE ~ NA_character_
+  )) %>%
+  mutate(
+    line_type = case_when(
+      page_type == "testimony" & line == 2 & ! is.na(lag(page_header)) & str_detect(text, "^Cr-|^Ct\\.-|^En\\-|^In-|^Re-|^\\(") ~ "page_subheader",
+      TRUE ~ line_type
+    ),
+    page_subheader = case_when(
+      line_type == "page_subheader" ~ text,
+      TRUE ~ NA_character_
+    )
+  ) %>%
+  fill(page_header, page_subheader, .direction = "downup") %>%
+  ungroup() %>%
   mutate(text = case_when(# correct speaker misattributions / typos
     day == 10 & page == 216 & str_detect(text, fixed("6 SUPT. NATALIA RODRIGUEZ: Well, the protesters")) ~ "6 SUPT. ROBERT DRUMMOND: Well, the protesters", # see misattribution: https://publicorderemergencycommission.ca/files/documents/Transcripts/POEC-Public-Hearings-Volume-10-October-26-2022.pdf#page=216
     day == 23 & page == 210 ~ str_replace(text, fixed("D/COMM: MICHAEL DUHEME:"), "D/COMM. MICHAEL DUHEME:"),
     TRUE ~ text
   )) %>%
-  filter(line_type == "speaker_start") %>%
-  mutate(speaker = str_remove(text, "^[0-9]{1,2} ")) %>%
+  mutate(speaker = if_else(line_type == "speaker_start", str_remove(text, "^[0-9]{1,2} "), NA_character_)) %>%
   separate(speaker, into = c("speaker"), sep = ":", extra = "drop") %>%
   mutate(speaker = str_squish(speaker)) %>%
   mutate(
@@ -96,13 +131,15 @@ lines <- lines_raw %>%
       "^dsg " = "dsg. ",
       "^mayer" = "mayor",
       "^ministre " = "minister ",
-      "^supt " = "supt. "
+      "^supt " = "supt. ",
+      "^dpm " = "deputy pm "
     )),
     speaker_standardized = str_replace_all(speaker_standardized, c(
       "cynthia termorhuizen|cynthia termoshuizen" = "cynthia termorshuizen",
       "alexandra haine" = "alexandra heine",
       "allision" = "allison",
       "alysssa" = "alyssa",
+      "alyssa tompkins" = "alyssa tomkins",
       "antione d’ailly|antoine d’ailly" = "antoine d'ailly",
       "bath sheba|bath-shéba" = "bath-sheba",
       "brandon miller|brendon miller" = "brendan miller",
@@ -111,6 +148,7 @@ lines <- lines_raw %>%
       "cafra zwibel" = "cara zwibel",
       "chris barber" = "christopher barber",
       "christpher diana|christoper diana" = "christopher diana",
+      "chrystia freeman" = "chrystia freeland",
       "collen mckeown" = "colleen mckeown",
       "comm\\. brenda luckie" = "comm. brenda lucki",
       "comimssion rouleau|commisioner rouleau|commissaire rouleau|commissiare rouleau|commission rouleau|^commissioner$|commissioner roleau|commissioner rousseau|commmissioner rouleau|member rouleau|the commissioner" = "commissioner rouleau",
@@ -124,12 +162,13 @@ lines <- lines_raw %>%
       "emelie taman|emily taman" = "emilie taman",
       "ds\\.? jacqueline bodgen|ds jacqueline bogden" = "jacqueline bogden", # remove title, though maybe we'll re-add for consistency with DMs / ADMs? (same with Charette, Thomas, ...?)
       "eric brosseau" = "eric brousseau",
+      "graham reader" = "graham reeder",
       "guillame sirois-gingras|guillaume sirois gingras" = "guillaume sirois-gingras",
       "hana laura yanamoto" = "hana laura yamamoto",
       "heather patterson" = "heather paterson",
       "interim chief bell" = "interim chief steve bell",
       "interlocuteur inconnu|interlocuteur non identifié|unidentified male spee?aker|unknown speaker" = "unidentified speaker",
-      "jean-simon shoenholz|jean-simon-schoenholz" = "jean-simon schoenholz",
+      "^jean-simon shoenholz$|^jean-simon-schoenholz$|^jean jean-simon schoenholz$" = "jean-simon schoenholz",
       "jeffrey hutchinsob|jeffrey hutchinson" = "jeffery hutchinson",
       "jeffery leon" = "jeffrey leon",
       "jessica barrows" = "jessica barrow",
@@ -161,12 +200,48 @@ lines <- lines_raw %>%
       "^st-pierre$" = "nicolas st-pierre",
       "supt\\. bernier" = "supt. robert bernier"
     ))
-  )
+  ) %>%
+  mutate(
+    section_header = case_when(
+      line_type == "section_header" ~ str_remove(text, "^[0-9]{1,2} --- "),
+      TRUE ~ NA_character_
+    ),
+    section_header = str_remove(section_header, ":$")
+  ) %>%
+  group_by(day) %>%
+  fill(section_header, .direction = "down") %>%
+  ungroup() %>%
+  select(day:text, page_type, line_type, page_header, page_subheader, section_header, speaker, speaker_standardized)
+
+testimony <- lines %>%
+  filter(
+    page_type == "testimony",
+    line_type %in% c("section_header", "speaker_start", "testimony", "proceedings_start", "time_marker")
+  ) %>%
+  select(-page_type, -page_header, -page_subheader) %>%
+  separate(text, into = c("transcript_line_number", "text_clean"), sep = " ", remove = FALSE, extra = "merge") %>%
+  select(everything(), text)
+
+testimony %>%
+  mutate(
+    speaker = if_else(line_type %in% c("speaker_start", "testimony"), speaker, "none"),
+    speaker_standardized = if_else(line_type %in% c("speaker_start", "testimony"), speaker_standardized, "none")
+  ) %>%
+  group_by(day) %>%
+  fill(speaker, speaker_standardized, .direction = "down") %>%
+  ungroup() %>%
+  mutate(
+    speaker = if_else(speaker == "none", NA_character_, speaker),
+    speaker_standardized = if_else(speaker_standardized == "none", NA_character_, speaker_standardized)
+  ) %>%
+  mutate(text_clean = case_when(
+    line_type == "speaker_start" ~ str_remove(text_clean, glue("^{speaker}: ?")),
+    TRUE ~ text_clean
+  ))
 
 # TODO idea: speaker type, counsel, lawyer, admin, witness (based on TOC entries?)
 
 
-# page_header = line 1?
 # time type: recessing, resuming, breaking, adjourning at ... 
 
 
