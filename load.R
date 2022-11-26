@@ -241,6 +241,11 @@ testimony <- lines %>%
   ) %>%
   select(-page_type, -page_header, -page_subheader) %>%
   separate(text, into = c("transcript_line_number", "text_clean"), sep = " ", remove = FALSE, convert = TRUE, extra = "merge") %>%
+  mutate(interjection_id = case_when(
+    line_type != "testimony" ~ str_glue("{str_pad(day, 2, 'left', '0')}-{str_pad(page, 3, 'left', '0')}-{str_pad(transcript_line_number, 2, 'left', '0')}"),
+    TRUE ~ NA_character_
+  )) %>%
+  fill(interjection_id, .direction = "down") %>%
   select(everything(), text)
 
 testimony %>%
@@ -261,11 +266,6 @@ testimony %>%
   ))
 
 testimony %>%
-  mutate(interjection_id = case_when(
-    line_type != "testimony" ~ str_glue("{str_pad(day, 2, 'left', '0')}-{str_pad(page, 3, 'left', '0')}-{str_pad(transcript_line_number, 2, 'left', '0')}"),
-    TRUE ~ NA_character_
-  )) %>%
-  fill(interjection_id, .direction = "down") %>%
   group_by(interjection_id) %>%
   summarize(text_clean = paste0(text_clean, collapse = " "))
 
