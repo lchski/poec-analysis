@@ -53,13 +53,16 @@ lines_raw %>%
 
 lines <- lines_raw %>%
   arrange(day, page, line) %>%
-  mutate(page_type = case_when(
-    line == 1 & text == "Public Hearing Audience publique" ~ "title",
-    line == 1 & str_detect(text, "^[0-9]{1,3}") ~ "testimony",
-    line == 1 & str_detect(text, "^[IV]{1,3}") ~ "front_matter",
-    line == 1 ~ "other",
-    TRUE ~ NA_character_
-  )) %>%
+  mutate(
+    line_id = str_glue("{str_pad(day, 2, 'left', '0')}-{str_pad(page, 3, 'left', '0')}-{str_pad(line, 2, 'left', '0')}"),
+    page_type = case_when(
+      line == 1 & text == "Public Hearing Audience publique" ~ "title",
+      line == 1 & str_detect(text, "^[0-9]{1,3}") ~ "testimony",
+      line == 1 & str_detect(text, "^[IV]{1,3}") ~ "front_matter",
+      line == 1 ~ "other",
+      TRUE ~ NA_character_
+    )
+  ) %>%
   group_by(day, page) %>%
   fill(page_type, .direction = "down") %>%
   mutate(
@@ -214,7 +217,21 @@ lines <- lines_raw %>%
   group_by(day) %>%
   fill(section_header, .direction = "down") %>%
   ungroup() %>%
-  select(day:text, page_type, line_type, page_header, page_subheader, section_header, speaker, speaker_standardized)
+  select(line_id, day:text, page_type, line_type, page_header, page_subheader, section_header, speaker, speaker_standardized)
+
+# extend `line_type==proceedings_end` to lines after the `proceedings_end` for a day's testimony
+lines <- lines %>% left_join(
+    lines %>%
+      filter(line_type == "proceedings_end") %>%
+      select(day, end_page = page, end_line = line)
+  ) %>%
+  mutate(line_type = case_when(
+    page >= end_page & line >= end_line & line_type != "page_footer" ~ "proceedings_end",
+    TRUE ~ line_type
+  )) %>%
+  select(-end_page, -end_line)
+
+
 
 # for debuggnig, confirm there are no duplicate names (typos, title inconsistencies etc)
 lines %>%
