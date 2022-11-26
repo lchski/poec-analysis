@@ -272,13 +272,19 @@ testimony <- lines %>%
     speaker_standardized = if_else(speaker_standardized == "none", NA_character_, speaker_standardized)
   ) %>%
   mutate(text_clean = case_when(# remove the speaker intro from speaker_start lines
-    line_type == "speaker_start" ~ str_remove(text_clean, str_glue("^{speaker}: ?")),
+    line_type == "speaker_start" ~ str_remove(text_clean, str_glue("^{speaker} ?: ?")),
     TRUE ~ text_clean
   ))
 
-testimony %>%
+testimony_with_combined_interjections <- testimony %>%
   group_by(interjection_id) %>%
-  summarize(text_clean = paste0(text_clean, collapse = " "))
+  summarize(text_clean_combined = paste0(text_clean, collapse = " ")) %>% # combine values in `text_clean` column by interjection block (group of rows with shared interjection_id)
+  left_join(
+    testimony %>%
+      select(line_id:line, transcript_line_number, interjection_id, line_type, section_header, speaker, speaker_standardized) %>% # drop text columns, reorganize
+      group_by(interjection_id) %>%
+      slice(1), # take just the first line for each interjection_id—since we're only looking for the metadata applicable to the whole interjection block, whatever's on the first line of that block should suffice
+    by = "interjection_id")
 
 # TODO idea: filter out is.na(text_clean) ? when it's testimony only, maybe?
 
