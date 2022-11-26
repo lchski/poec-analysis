@@ -259,21 +259,19 @@ testimony <- lines %>%
     TRUE ~ NA_character_
   )) %>%
   fill(interjection_id, .direction = "down") %>%
-  select(everything(), text)
-
-testimony %>%
-  mutate(
+  select(everything(), text) %>%
+  mutate(# put a placeholder value of "none" in the speaker vars for non-speech lines
     speaker = if_else(line_type %in% c("speaker_start", "testimony"), speaker, "none"),
     speaker_standardized = if_else(line_type %in% c("speaker_start", "testimony"), speaker_standardized, "none")
   ) %>%
   group_by(day) %>%
-  fill(speaker, speaker_standardized, .direction = "down") %>%
+  fill(speaker, speaker_standardized, .direction = "down") %>% # per day, fill speaker value down; because we have placeholder values, this should only fill into testimony lines
   ungroup() %>%
-  mutate(
+  mutate(# revert the placeholder values to NA
     speaker = if_else(speaker == "none", NA_character_, speaker),
     speaker_standardized = if_else(speaker_standardized == "none", NA_character_, speaker_standardized)
   ) %>%
-  mutate(text_clean = case_when(
+  mutate(text_clean = case_when(# remove the speaker intro from speaker_start lines
     line_type == "speaker_start" ~ str_remove(text_clean, str_glue("^{speaker}: ?")),
     TRUE ~ text_clean
   ))
