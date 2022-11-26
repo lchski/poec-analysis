@@ -98,8 +98,13 @@ lines <- lines_raw %>%
       day == 15 & page == 231 & str_detect(text, fixed("10 And:")) ~ "other",
       day == 13 & page == 103 & str_detect(text, fixed("6 in:")) ~ "other",
       day == 6 & page == 121 & str_detect(text, fixed("20 And:")) ~ "other",
-      day == 1 & page == 73 & str_detect(text, fixed("18 SHEPPARD:")) ~ "section_header",
-      day == 1 & page == 94 & str_detect(text, fixed("10 BY MR. DAN SHEPPARD:")) ~ "section_header",
+      day == 1 & page == 73 & str_detect(text, fixed("18 SHEPPARD:")) ~ "section_header", # multi-line section header
+      day == 1 & page == 94 & str_detect(text, fixed("10 BY MR. DAN SHEPPARD:")) ~ "section_header", # multi-line section header
+      line_id == "01-073-18" & text == "17 HEALTH MEASURES IMPLEMENTED IN CANADA PRESENTED BY MR. DAN" ~ "section_header", # multi-line section header, per debugging/unexpected-testimony-line-type
+      line_id == "01-088-18" & text == "17 CHALLENGES RELATING TO PUBLIC HEALTH MEASURES PRESENTED BY MR." ~ "section_header", # multi-line section header, per debugging/unexpected-testimony-line-type
+      line_id == "01-103-03" & text == "1 ÉTIENNE LACOMBE" ~ "section_header", # multi-line section header, per debugging/unexpected-testimony-line-type
+      line_id == "01-109-08" & text == "6 GOVERNMENT IN RELATIONS TO THE EMERGENCIES ACT PRESENTED BY MR." ~ "section_header", # multi-line section header, per debugging/unexpected-testimony-line-type
+      line_id == "01-109-09" & text == "7 ÉTIENNE LACOMBE" ~ "section_header", # multi-line section header, per debugging/unexpected-testimony-line-type
       TRUE ~ line_type
     ),
     line_type = case_when(
