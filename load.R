@@ -227,7 +227,7 @@ testimony <- lines %>%
     line_type %in% c("section_header", "speaker_start", "testimony", "proceedings_start", "time_marker")
   ) %>%
   select(-page_type, -page_header, -page_subheader) %>%
-  separate(text, into = c("transcript_line_number", "text_clean"), sep = " ", remove = FALSE, extra = "merge") %>%
+  separate(text, into = c("transcript_line_number", "text_clean"), sep = " ", remove = FALSE, convert = TRUE, extra = "merge") %>%
   select(everything(), text)
 
 testimony %>%
@@ -246,6 +246,27 @@ testimony %>%
     line_type == "speaker_start" ~ str_remove(text_clean, str_glue("^{speaker}: ?")),
     TRUE ~ text_clean
   ))
+
+testimony %>%
+  mutate(interjection_id = case_when(
+    line_type != "testimony" ~ str_glue("{str_pad(day, 2, 'left', '0')}-{str_pad(page, 3, 'left', '0')}-{str_pad(transcript_line_number, 2, 'left', '0')}"),
+    TRUE ~ NA_character_
+  )) %>%
+  fill(interjection_id, .direction = "down") %>%
+  group_by(interjection_id) %>%
+  summarize(text_clean = paste0(text_clean, collapse = " "))
+
+# for debugging, find non-speech lines followed by non-speaker_start lines (after a heading, or time marker, etc, the speaker should always be identified)
+unexpected_line_type_following_non_speech <- testimony %>%
+  mutate(next_line_type = lead(line_type), next_text = lead(text)) %>%
+  filter(! line_type %in% c("speaker_start", "testimony") & lead(line_type) != "speaker_start") %>%
+  select(-transcript_line_number, -text_clean, -speaker, -speaker_standardized)
+
+unexpected_line_type_following_non_speech %>%
+  filter(next_line_type == "testimony")
+
+# When non-speech is followed by non-speech - all good.
+# When non-speech is followed immediately by testimony - likely problem. (Usually, multi-line section_header. Sometimes, speaker ID is missing from original transcript.)
 
 # TODO idea: speaker type, counsel, lawyer, admin, witness (based on TOC entries?)
 
