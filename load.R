@@ -63,6 +63,17 @@ lines <- lines_raw %>%
       TRUE ~ NA_character_
     )
   ) %>%
+  mutate(text = case_when(# correct speaker misattributions / typos before any more processing occurs
+    day == 10 & page == 216 & str_detect(text, fixed("6 SUPT. NATALIA RODRIGUEZ: Well, the protesters")) ~ "6 SUPT. ROBERT DRUMMOND: Well, the protesters", # see misattribution: https://publicorderemergencycommission.ca/files/documents/Transcripts/POEC-Public-Hearings-Volume-10-October-26-2022.pdf#page=216
+    day == 23 & page == 210 ~ str_replace(text, fixed("D/COMM: MICHAEL DUHEME:"), "D/COMM. MICHAEL DUHEME:"),
+    line_id == "04-259-05" & text == "3 Good afternoon, Mr. Ayotte. May name is Rob" ~ "3 MR. ROB KITTREDGE: Good afternoon, Mr. Ayotte. May name is Rob", # missing speaker intro, per debugging/unexpected-testimony-line-type
+    line_id == "04-265-09" & text == "7 Good afternoon, Commissioner. Mr. Ayotte, my" ~ "7 MR. ANDREW GIBBS: Good afternoon, Commissioner. Mr. Ayotte, my", # missing speaker intro, per debugging/unexpected-testimony-line-type
+    line_id == "05-100-08" & text == "6 Good afternoon, Councillor Deans and" ~ "6 MS. REBECCA JONES: Good afternoon, Councillor Deans and", # missing speaker intro, per debugging/unexpected-testimony-line-type
+    line_id == "05-185-15" & text == "13 Councillor Deans, am I correct that your evidence" ~ "13 MS. ALYSSA TOMKINS: Councillor Deans, am I correct that your evidence", # missing speaker intro, per debugging/unexpected-testimony-line-type
+    line_id == "05-295-18" & text == "16 Good evening, sir, my name is Alan Honner and I’m" ~ "16 MR. ALAN HONNER: Good evening, sir, my name is Alan Honner and I’m", # missing speaker intro, per debugging/unexpected-testimony-line-type
+    line_id == "15-197-12" & text == "10 Mr. Marazzo, Tom Curry for former Chief Sloly." ~ "10 MR. TOM CURRY: Mr. Marazzo, Tom Curry for former Chief Sloly.", # missing speaker intro, per debugging/unexpected-testimony-line-type
+    TRUE ~ text
+  )) %>%
   group_by(day, page) %>%
   fill(page_type, .direction = "down") %>%
   mutate(
@@ -71,7 +82,7 @@ lines <- lines_raw %>%
       text == fixed("INTERNATIONAL REPORTING INC.") ~ "page_footer",
       str_detect(text, "^[0-9]{1,2} C E R T I F I C A T I O N") ~ "proceedings_end",
       str_detect(text, "^[0-9]{1,2} --- Upon commencing") ~ "proceedings_start",
-      str_detect(text, "^[0-9]{1,2} --- Upon") ~ "time_marker",
+      str_detect(text, "^[0-9]{1,2} ---? ?Upon") ~ "time_marker",
       str_detect(text, "^[0-9]{1,2} --- [A-Z]") ~ "section_header",
       str_detect(text, "^[0-9]{1,2} [A-ZÈÉ\\.eci/ \\-'’(?:van)(?:den)(?:Mme)(?:Del)]*:") ~ "speaker_start",
       TRUE ~ "other"
@@ -113,11 +124,6 @@ lines <- lines_raw %>%
   ) %>%
   fill(page_header, page_subheader, .direction = "downup") %>%
   ungroup() %>%
-  mutate(text = case_when(# correct speaker misattributions / typos
-    day == 10 & page == 216 & str_detect(text, fixed("6 SUPT. NATALIA RODRIGUEZ: Well, the protesters")) ~ "6 SUPT. ROBERT DRUMMOND: Well, the protesters", # see misattribution: https://publicorderemergencycommission.ca/files/documents/Transcripts/POEC-Public-Hearings-Volume-10-October-26-2022.pdf#page=216
-    day == 23 & page == 210 ~ str_replace(text, fixed("D/COMM: MICHAEL DUHEME:"), "D/COMM. MICHAEL DUHEME:"),
-    TRUE ~ text
-  )) %>%
   mutate(speaker = if_else(line_type == "speaker_start", str_remove(text, "^[0-9]{1,2} "), NA_character_)) %>%
   separate(speaker, into = c("speaker"), sep = ":", extra = "drop") %>%
   mutate(speaker = str_squish(speaker)) %>%
@@ -227,6 +233,7 @@ lines <- lines %>% left_join(
       select(day, end_page = page, end_line = line)
   ) %>%
   mutate(line_type = case_when(
+    lead(line_type) == "proceedings_end" & str_detect(text, "^[0-9]{1,2}[:blank:]*$") ~ "proceedings_end", # set blank line before proceedings end as also "proceedings_end"
     page >= end_page & line >= end_line & line_type != "page_footer" ~ "proceedings_end",
     TRUE ~ line_type
   )) %>%
@@ -269,6 +276,8 @@ testimony %>%
 testimony %>%
   group_by(interjection_id) %>%
   summarize(text_clean = paste0(text_clean, collapse = " "))
+
+# TODO idea: filter out is.na(text_clean) ? when it's testimony only, maybe?
 
 
 # TODO idea: speaker type, counsel, lawyer, admin, witness (based on TOC entries?)
