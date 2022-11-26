@@ -284,7 +284,11 @@ testimony_with_combined_interjections <- testimony %>%
       select(line_id:line, transcript_line_number, interjection_id, line_type, section_header, speaker, speaker_standardized) %>% # drop text columns, reorganize
       group_by(interjection_id) %>%
       slice(1), # take just the first line for each interjection_id—since we're only looking for the metadata applicable to the whole interjection block, whatever's on the first line of that block should suffice
-    by = "interjection_id")
+    by = "interjection_id") %>%
+  filter(! is.na(interjection_id))
+
+testimony_with_combined_interjections %>%
+  write_csv("data/out/testimony-with-combined-interjections.csv")
 
 # TODO idea: filter out is.na(text_clean) ? when it's testimony only, maybe?
 
