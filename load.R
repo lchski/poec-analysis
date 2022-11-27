@@ -74,6 +74,7 @@ lines <- lines_raw %>%
     line_id == "05-185-15" & text == "13 Councillor Deans, am I correct that your evidence" ~ "13 MS. ALYSSA TOMKINS: Councillor Deans, am I correct that your evidence", # missing speaker intro, per debugging/unexpected-testimony-line-type
     line_id == "05-295-18" & text == "16 Good evening, sir, my name is Alan Honner and I’m" ~ "16 MR. ALAN HONNER: Good evening, sir, my name is Alan Honner and I’m", # missing speaker intro, per debugging/unexpected-testimony-line-type
     line_id == "15-197-12" & text == "10 Mr. Marazzo, Tom Curry for former Chief Sloly." ~ "10 MR. TOM CURRY: Mr. Marazzo, Tom Curry for former Chief Sloly.", # missing speaker intro, per debugging/unexpected-testimony-line-type
+    line_id == "16-359-26" & text == "24 --- Upon recessing at 7:32 p.m." ~ "24 --- Upon adjourning at 7:32 p.m.", # transcript reads "recessing" but context indicates it's adjournment (it was a late night!)
     TRUE ~ text
   )) %>%
   group_by(day, page) %>%
@@ -82,8 +83,9 @@ lines <- lines_raw %>%
     line_type = case_when(
       line == 1 ~ "page_header",
       text == fixed("INTERNATIONAL REPORTING INC.") ~ "page_footer",
-      str_detect(text, "^[0-9]{1,2} C E R T I F I C A T I O N") ~ "proceedings_end",
+      str_detect(text, "^[0-9]{1,2} C E R T I F I C A T I O N") ~ "transcript_certification",
       str_detect(text, "^[0-9]{1,2} --- Upon commencing") ~ "proceedings_start",
+      str_detect(text, "^[0-9]{1,2} ---? ?Upon adjourning") ~ "proceedings_end",
       str_detect(text, "^[0-9]{1,2} ---? ?Upon") ~ "time_marker",
       str_detect(text, "^[0-9]{1,2} --- [A-Z]") ~ "section_header",
       str_detect(text, "^[0-9]{1,2} [A-ZÈÉ\\.eci/ \\-'’(?:van)(?:den)(?:Mme)(?:Del)]*:") ~ "speaker_start",
@@ -232,16 +234,16 @@ lines <- lines_raw %>%
   ungroup() %>%
   select(line_id, day:text, page_type, line_type, page_header, page_subheader, section_header, speaker, speaker_standardized)
 
-# extend `line_type==proceedings_end` to lines after the `proceedings_end` for a day's testimony
+# extend `line_type==transcript_certification` to lines after the `transcript_certification` for a day's testimony
 # NB: I don't love this approach of rewriting a variable based on its own value (since it can cause effects if the script isn't re-run top-to-bottom), but it's good enough for now
 lines <- lines %>% left_join(
     lines %>%
-      filter(line_type == "proceedings_end") %>%
+      filter(line_type == "transcript_certification") %>%
       select(day, end_page = page, end_line = line)
   ) %>%
   mutate(line_type = case_when(
-    lead(line_type) == "proceedings_end" & str_detect(text, "^[0-9]{1,2}[:blank:]*$") ~ "proceedings_end", # set blank line before proceedings end as also "proceedings_end"
-    page >= end_page & line >= end_line & line_type != "page_footer" ~ "proceedings_end",
+    lead(line_type) == "transcript_certification" & str_detect(text, "^[0-9]{1,2}[:blank:]*$") ~ "transcript_certification", # set blank line before proceedings end as also "transcript_certification"
+    page >= end_page & line >= end_line & line_type != "page_footer" ~ "transcript_certification",
     TRUE ~ line_type
   )) %>%
   select(-end_page, -end_line)
@@ -252,7 +254,7 @@ lines <- lines %>% left_join(
 testimony <- lines %>%
   filter(
     page_type == "testimony",
-    line_type %in% c("section_header", "speaker_start", "testimony", "proceedings_start", "time_marker")
+    line_type %in% c("section_header", "speaker_start", "testimony", "proceedings_start", "proceedings_end", "time_marker")
   ) %>%
   select(-page_type, -page_header, -page_subheader) %>%
   separate(text, into = c("transcript_line_number", "text_clean"), sep = " ", remove = FALSE, convert = TRUE, extra = "merge") %>%
