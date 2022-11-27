@@ -5,6 +5,8 @@ library(pdftools)
 library(lubridate)
 library(rvest)
 
+speaker_annotations <- read_csv("data/indices/speakers-standardized-annotations.csv")
+
 proceeding_links <- read_html("https://publicorderemergencycommission.ca/public-hearings/") %>%
   html_elements(xpath = "//a[starts-with(@href, 'https://publicorderemergencycommission.ca/public-hearings/day')]")
 
