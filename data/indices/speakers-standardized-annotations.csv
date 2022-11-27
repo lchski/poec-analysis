@@ -1,4 +1,4 @@
-speaker_standardized,speaker_proper,speaker_title,speaker_group,speaker_affiliation,notes
+speaker_standardized,speaker_proper,speaker_title,speaker_group,speaker_affiliation,speaker_notes
 acting deputy chief patricia ferguson,Patricia Ferguson,Acting Deputy Chief,witness,Ottawa Police Service / City of Ottawa (Ott-OPS),
 acting supt. marcel beaudin,Marcel Beaudin,Acting Superintendent (Supt),witness,Ontario Provincial Police / Government of Ontario (ON-OPP),
 adm. cynthia termorshuizen,Cindy Termorhuizen,Assistant Deputy Minister (ADM),witness,Global Affairs / Government of Canada (GC-GAC),confirm ADM
@@ -8,8 +8,8 @@ adm. isabelle jacques,Isabellle Jacques,Assistant Deputy Minister (ADM),witness,
 adm. marlin degrand,Marlin Degrand,Assistant Deputy Minister (ADM),witness,?? / Government of Alberta (AB-??),confirm ADM / org
 adm. rhys mendes,Rhys Mendes,Assistant Deputy Minister (ADM),witness,Finance / Government of Canada (GC-FIN),confirm ADM
 alan honner
-alexandra heine
-allison mcmahon
+alexandra heine,Alexandra Heine,Counsel,counsel,Public Order Emergency Commission (POEC),
+allison mcmahon,Allison McMahon,Counsel,counsel,Public Order Emergency Commission (POEC),
 alyssa tomkins
 and plan b
 andrea gonsalves
@@ -36,17 +36,17 @@ christopher diana
 colleen mckeown
 comm. brenda lucki,Brenda Lucki,Commissioner (Comm),witness,Royal Canadian Mounted Police / Government of Canada (GC-RCMP),
 comm. thomas carrique,Thomas Carrique,Commissioner (Comm),witness,Ontario Provincial Police / Government of Ontario (ON-OPP),
-commissioner rouleau,Paul Rouleau,Commissioner,commission,Pubic Order Emergency Commission (POEC),
+commissioner rouleau,Paul Rouleau,Commissioner,commission,Public Order Emergency Commission (POEC),
 councillor catherine mckenney,Catherine McKenney,Councillor,witness,City of Ottawa (Ott),
 councillor marco van huigenbos,Marco Van Huigenbos,Councillor,witness,Fort Macleod,
 councillor mathieu fleury,Mathieu Fleury,Councillor,witness,City of Ottawa (Ott),
 cynthia lau
 d/comm. curtis zablocki,Curtis Zablocki,Deputy Commissioner (D/Comm),witness,Royal Canadian Mounted Police / Government of Canada (GC-RCMP),
 d/comm. michael duheme,Michael Duheme,Deputy Commissioner (D/Comm),witness,Royal Canadian Mounted Police / Government of Canada (GC-RCMP),
-dahlia shuhaibar
+dahlia shuhaibar,Dahlia Shuhaibar,Counsel,counsel,Public Order Emergency Commission (POEC),
 daniel bulford,Daniel Bulford,,witness,??,
 daniel chomski
-daniel sheppard
+daniel sheppard,Dan Sheppard,Senior Counsel,counsel,Public Order Emergency Commission (POEC),
 darrell kloeze
 david migicovsky
 david shiroky
@@ -60,17 +60,17 @@ dm. robert stewart,Rob Stewart,Deputy Minister,witness,Public Safety / Governmen
 donnaree nygard
 dsg. mario di tommaso,Mario Di Tommaso,Deputy Solicitor General (DSG),witness,Solicitor General / Government of Ontario (ON-SolGen),
 emilie taman
-eric brousseau
-étienne lacombe
+eric brousseau,Eric Brousseau,Counsel,counsel,Public Order Emergency Commission (POEC),
+étienne lacombe,Étienne Lacombe,Counsel,counsel,Public Order Emergency Commission (POEC),
 eva chipiuk
 ewa krajewska
-frank au
-gabriel poliquin
-gordon cameron
+frank au,Frank Au,Senior Counsel,counsel,Public Order Emergency Commission (POEC),
+gabriel poliquin,Gabriel Poliquin,Senior Counsel,counsel,Public Order Emergency Commission (POEC),
+gordon cameron,Gordon Cameron,Senior Counsel,counsel,Public Order Emergency Commission (POEC),
 gordon campbell
 graham reeder
 greg delbigio
-guillaume sirois-gingras
+guillaume sirois-gingras,Guillaume Sirois,Counsel,counsel,Public Order Emergency Commission (POEC),
 hana laura yamamoto
 hatim kheir
 heather paterson
@@ -83,9 +83,9 @@ jane scharf
 janice charette,Janice Charette,Clerk of the Privy Council,witness,Privy Council Office / Government of Canada (GC-PCO),
 jason beitchman
 jason theriault
-jean-simon schoenholz
+jean-simon schoenholz,Jean-Simon Schoenholz,Counsel,counsel,Public Order Emergency Commission (POEC),
 jeffery hutchinson,Jeff Hutchinson,??,witness,Privy Council Office / Government of Canada (GC-PCO),
-jeffrey leon
+jeffrey leon,Jeffrey Leon,Co-lead Counsel,counsel,Public Order Emergency Commission (POEC),
 jen del riccio
 jennifer king
 jeremy mackenzie,Jeremy MacKenzie,,witness,??,
@@ -94,7 +94,7 @@ jim karahalios
 jinan kubursi
 jody thomas,Jody Thomas,?? (NSIA),witness,Privy Council Office / Government of Canada (GC-PCO),
 john brodhead,John Brodhead,,witness,Prime Minister’s Office / Government of Canada (GC-PMO),
-john mather
+john mather,John Mather,Counsel,counsel,Public Order Emergency Commission (POEC),
 john ossowski,John Ossowski,former President (DM),witness,Canadian Border Services Agency / Government of Canada (GC-CBSA),
 joseph comartin,Joe Comartin,??,witness,Global Affairs / Government of Canada (GC-GAC),
 katherine telford,Katie Telford,,witness,Prime Minister’s Office / Government of Canada (GC-PMO),
@@ -122,16 +122,16 @@ minister dominic leblanc,Dominic LeBlanc,Minister,witness,witness,Intergovernmen
 minister marco mendicino,Marco Mendicino,Minister,witness,Public Safety / Government of Canada (GC-PS),
 minister omar alghabra,Omar Alghabra,Minister,witness,Transport / Government of Canada (GC-TC),
 minister william blair,Bill Blair,Minister,witness,Emergency Preparedness / Government of Canada (GC-PS),
-misha boutilier
+misha boutilier,Misha Boutilier,Counsel,counsel,Public Order Emergency Commission (POEC),
 mitch mcadam
-natalia rodriguez
+natalia rodriguez,Natalia Rodriguez,Senior Counsel,counsel,Public Order Emergency Commission (POEC),
 natasha calvinho
 nathalie carrier,Nathalie Carrier,,witness,??,
 nathalie drouin,Nathalie Drouin,Deputy Clerk of the Privy Council,witness,Privy Council Office / Government of Canada (GC-PCO),
 nicolas st-pierre
 nikolas de stefano
 nini jones
-nusra khan
+nusra khan,Nusra Khan,Counsel,counsel,Public Order Emergency Commission (POEC),
 patrick king,Patrick King,,witness,??,
 paul champ
 paul leschied,Paul Leschied,,witness,??,
@@ -143,13 +143,13 @@ rebecca shepherd
 rob kittredge
 robert mackinnon
 ryann atkins
-sajeda hedaraly
+sajeda hedaraly,Sajeda Hedaraly,Counsel,counsel,Public Order Emergency Commission (POEC),
 serge arpin,Serge Arpin,Chief of Staff,witness,City of Ottawa (Ott),
-shantona chaudhury
+shantona chaudhury,Shantona Chaudhury,Co-lead Counsel,counsel,Public Order Emergency Commission (POEC),
 sherif foda
 steeve charland,Steeve Charland,,witness,??,
 stephanie bowes
-stephen armstrong
+stephen armstrong,Stephen Armstrong,Counsel,counsel,Public Order Emergency Commission (POEC),
 stephen aylward
 steve kanellakos,Steve Kanellakos,City Manager,witness,City of Ottawa (Ott),
 sujit choudhry
@@ -159,8 +159,8 @@ supt. patrick morris,Pat Morris,Superintendent (Supt),witness,Ontario Provincial
 supt. robert bernier,Robert Bernier,Superintendent (Supt),witness,Ottawa Police Service / City of Ottawa (Ott-OPS),
 supt. robert drummond,Robert Drummond,Superintendent (Supt),witness,Ottawa Police Service / City of Ottawa (Ott-OPS),
 tamara lich,Tamara Lich,,witness,??,
-the clerk,The Clerk,,commission,Pubic Order Emergency Commission (POEC),
-the registrar,The Registrar,,commission,Pubic Order Emergency Commission (POEC),
+the clerk,The Clerk,,commission,Public Order Emergency Commission (POEC),
+the registrar,The Registrar,,commission,Public Order Emergency Commission (POEC),
 thomas mcrae
 tom curry
 tom marazzo,Tom Marazzo,,witness,??,

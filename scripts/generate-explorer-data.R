@@ -5,6 +5,11 @@ source("load.R")
 #   group_walk(~ write_csv(.x, str_glue("data/out/poec-explorer/testimony/volume-{.y$day}.csv")))
 
 testimony_with_combined_interjections %>%
+  rename(
+    intervention_id = interjection_id,
+    text = text_clean_combined
+  ) %>%
+  left_join(speaker_annotations %>% select(-speaker_notes), by = "speaker_standardized") %>%
   write_csv("data/out/poec-explorer/testimony/testimony.csv")
 
 proceedings %>%
