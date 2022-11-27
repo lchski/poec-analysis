@@ -1,6 +1,14 @@
 source("load.R")
 
-testimony_with_combined_interjections %>%
-  group_by(day) %>%
-  group_walk(~ write_csv(.x, str_glue("data/out/poec-explorer/testimony/volume-{.y$day}.csv")))
+# testimony_with_combined_interjections %>%
+#   group_by(day) %>%
+#   group_walk(~ write_csv(.x, str_glue("data/out/poec-explorer/testimony/volume-{.y$day}.csv")))
 
+testimony_with_combined_interjections %>%
+  write_csv("data/out/poec-explorer/testimony/testimony.csv")
+
+proceedings %>%
+  write_csv("data/out/poec-explorer/testimony/proceedings.csv")
+
+speaker_annotations %>%
+  write_csv("data/out/poec-explorer/testimony/speakers.csv")
