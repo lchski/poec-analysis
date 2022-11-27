@@ -1,8 +1,6 @@
-source("load.R")
+library(jsonlite)
 
-# testimony_with_combined_interjections %>%
-#   group_by(day) %>%
-#   group_walk(~ write_csv(.x, str_glue("data/out/poec-explorer/testimony/volume-{.y$day}.csv")))
+source("load.R")
 
 speaker_annotations_for_web <- speaker_annotations %>%
   mutate(# slugify upfront to save processing cost
@@ -13,16 +11,45 @@ speaker_annotations_for_web <- speaker_annotations %>%
   ) %>%
   select(-speaker_notes)
 
-testimony_with_combined_interjections %>%
+
+
+testimony_for_web <- testimony_with_combined_interjections %>%
   rename(
     intervention_id = interjection_id,
     text = text_clean_combined
   ) %>%
-  left_join(speaker_annotations_for_web, by = "speaker_standardized") %>%
+  left_join(speaker_annotations_for_web, by = "speaker_standardized")
+
+testimony_for_web %>%
   write_csv("data/out/poec-explorer/testimony/testimony.csv", na = "")
 
+
+
 proceedings %>%
-  write_csv("data/out/poec-explorer/testimony/proceedings.csv", na = "")
+  left_join((# add details about each day's testimony (number of pages, speakers, etc), TODO: add words etc
+    testimony_for_web %>%
+      group_by(day) %>%
+      summarize(
+        pages_of_testimony = max(page) - min(page)
+      ) %>%
+      mutate(
+        speakers = map(day, ~ (
+          testimony_for_web %>%
+            filter(day == .x, ! is.na(speaker_proper)) %>%
+            count(speaker_standardized, sort = TRUE, name = "n_interventions") %>%
+            left_join(speaker_annotations_for_web, by = "speaker_standardized")
+        )),
+        n_speakers = map_int(speakers, nrow),
+        n_witnesses = map_int(speakers, ~ (
+          .x %>%
+            filter(speaker_group == "witness") %>%
+            nrow()
+        ))
+      )
+  )) %>%
+  write_json("data/out/poec-explorer/testimony/proceedings.json", pretty = TRUE)
+
+
 
 speaker_annotations_for_web %>%
   filter(! is.na(speaker_proper)) %>%
