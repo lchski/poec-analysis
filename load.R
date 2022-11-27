@@ -75,6 +75,8 @@ lines <- lines_raw %>%
     line_id == "05-295-18" & text == "16 Good evening, sir, my name is Alan Honner and I’m" ~ "16 MR. ALAN HONNER: Good evening, sir, my name is Alan Honner and I’m", # missing speaker intro, per debugging/unexpected-testimony-line-type
     line_id == "15-197-12" & text == "10 Mr. Marazzo, Tom Curry for former Chief Sloly." ~ "10 MR. TOM CURRY: Mr. Marazzo, Tom Curry for former Chief Sloly.", # missing speaker intro, per debugging/unexpected-testimony-line-type
     line_id == "16-359-26" & text == "24 --- Upon recessing at 7:32 p.m." ~ "24 --- Upon adjourning at 7:32 p.m.", # transcript reads "recessing" but context indicates it's adjournment (it was a late night!)
+    day == 6 & page >= 117 & page <= 126 & str_detect(text, fixed("MR. CHRISTOPHER DEANS: ")) ~ str_replace(text, fixed("MR. CHRISTOPHER DEANS: "), "MR. CHRISTOPHER DIANA: "), # context indicates last name of "DEANS" was typo for "DIANA" (appears nowhere else in testimony)
+    day == 27 & page >= 13 & page <= 18 & str_detect(text, fixed("MR. GORDON CAMPBELL: ")) ~ str_replace(text, fixed("MR. GORDON CAMPBELL: "), "MR. GORDON CAMERON: "), # context indicates last name of "CAMPBELL" was typo for "CAMERON" (appears nowhere else in testimony)
     TRUE ~ text
   )) %>%
   group_by(day, page) %>%
@@ -216,7 +218,7 @@ lines <- lines_raw %>%
       "steven aylward" = "stephen aylward",
       "steven kanellakos" = "steve kanellakos",
       "sujit choudhury" = "sujit choudhry",
-      "the register" = "the registrar",
+      "the register|^jason theriault$" = "the registrar",
       "tom mcrae" = "thomas mcrae",
       "^st-pierre$" = "nicolas st-pierre",
       "supt\\. bernier" = "supt. robert bernier"
@@ -306,3 +308,5 @@ testimony_with_combined_interjections %>%
 # time type: recessing, resuming, breaking, adjourning at ... 
 
 
+
+# TODO: speaker errors, "line", "and plan b"

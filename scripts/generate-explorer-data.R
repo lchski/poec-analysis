@@ -16,4 +16,6 @@ proceedings %>%
   write_csv("data/out/poec-explorer/testimony/proceedings.csv")
 
 speaker_annotations %>%
+  select(-speaker_notes) %>%
+  filter(! is.na(speaker_proper)) %>%
   write_csv("data/out/poec-explorer/testimony/speakers.csv")
