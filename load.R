@@ -280,6 +280,9 @@ testimony <- lines %>%
     TRUE ~ text_clean
   ))
 
+testimony %>%
+  write_csv("data/out/testimony.csv")
+
 testimony_with_combined_interjections <- testimony %>%
   group_by(interjection_id) %>%
   summarize(text_clean_combined = paste0(text_clean, collapse = " ")) %>% # combine values in `text_clean` column by interjection block (group of rows with shared interjection_id)
