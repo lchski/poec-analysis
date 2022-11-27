@@ -5,7 +5,18 @@ library(pdftools)
 library(lubridate)
 library(rvest)
 
-speaker_annotations <- read_csv("data/indices/speakers-standardized-annotations.csv")
+speaker_annotations <- read_csv("data/indices/speakers-standardized-annotations.csv") %>%
+  separate(speaker_title, into = c("speaker_title", "speaker_title_abbr"), sep = "\\(", fill = "right") %>%
+  mutate(
+    speaker_title = str_squish(speaker_title),
+    speaker_title_abbr = str_remove(speaker_title_abbr, "\\)$")
+  ) %>%
+  separate(speaker_affiliation, into = c("speaker_affiliation", "speaker_affiliation_abbr"), sep = "\\(", fill = "right") %>%
+  mutate(
+    speaker_affiliation = str_squish(speaker_affiliation),
+    speaker_affiliation_abbr = str_remove(speaker_affiliation_abbr, "\\)$")
+  )
+
 
 proceeding_links <- read_html("https://publicorderemergencycommission.ca/public-hearings/") %>%
   html_elements(xpath = "//a[starts-with(@href, 'https://publicorderemergencycommission.ca/public-hearings/day')]")
@@ -280,7 +291,14 @@ testimony <- lines %>%
   mutate(text_clean = case_when(# remove the speaker intro from speaker_start lines
     line_type == "speaker_start" ~ str_remove(text_clean, str_glue("^{speaker} ?: ?")),
     TRUE ~ text_clean
-  ))
+  )) %>%
+  mutate(# clean section header formatting (remove ---, remove :)
+    text_clean = if_else(line_type == "section_header", str_remove(text_clean, "^-{2,3} ?"), text_clean),
+    text_clean = if_else(line_type == "section_header", str_remove(text_clean, ":$"), text_clean)
+  ) %>%
+  mutate(# clean time marker formatting (remove ---)
+    text_clean = if_else(line_type %in% c("proceedings_start", "proceedings_end", "time_marker"), str_remove(text_clean, "^-{2,3} ?"), text_clean)
+  )
 
 testimony %>%
   write_csv("data/out/testimony.csv")
