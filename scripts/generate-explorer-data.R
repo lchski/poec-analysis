@@ -10,12 +10,12 @@ testimony_with_combined_interjections %>%
     text = text_clean_combined
   ) %>%
   left_join(speaker_annotations %>% select(-speaker_notes), by = "speaker_standardized") %>%
-  write_csv("data/out/poec-explorer/testimony/testimony.csv")
+  write_csv("data/out/poec-explorer/testimony/testimony.csv", na = "")
 
 proceedings %>%
-  write_csv("data/out/poec-explorer/testimony/proceedings.csv")
+  write_csv("data/out/poec-explorer/testimony/proceedings.csv", na = "")
 
 speaker_annotations %>%
   select(-speaker_notes) %>%
   filter(! is.na(speaker_proper)) %>%
-  write_csv("data/out/poec-explorer/testimony/speakers.csv")
+  write_csv("data/out/poec-explorer/testimony/speakers.csv", na = "")
