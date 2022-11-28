@@ -9,6 +9,7 @@ speaker_annotations_for_web <- speaker_annotations %>%
     speaker_id_web = str_remove_all(speaker_id_web, "[\\.]"),
     speaker_id_web = str_replace_all(speaker_id_web, "[^a-z0-9]", "-")
   ) %>%
+  mutate(across(everything(), .fns = ~ str_replace_all(.x, fixed("??"), "?TBC?"))) %>% # TODO: actually fix these
   select(-speaker_notes)
 
 
@@ -26,6 +27,7 @@ testimony_for_web %>%
 
 
 proceedings %>%
+  left_join(read_csv("data/indices/proceeding-court-reporters.csv"), by = "day") %>%
   left_join((# add details about each day's testimony (number of pages, speakers, etc), TODO: add words etc
     testimony_for_web %>%
       group_by(day) %>%
@@ -53,4 +55,13 @@ proceedings %>%
 
 speaker_annotations_for_web %>%
   filter(! is.na(speaker_proper)) %>%
+  left_join((
+    testimony_for_web %>%
+      group_by(speaker_standardized) %>%
+      summarize(
+        n_interventions = n(),
+        n_speaking_days = n_distinct(day),
+      )
+  )) %>%
   write_csv("data/out/poec-explorer/testimony/speakers.csv", na = "")
+
