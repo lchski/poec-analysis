@@ -88,6 +88,7 @@ lines <- lines_raw %>%
     line_id == "16-359-26" & text == "24 --- Upon recessing at 7:32 p.m." ~ "24 --- Upon adjourning at 7:32 p.m.", # transcript reads "recessing" but context indicates it's adjournment (it was a late night!)
     day == 6 & page >= 117 & page <= 126 & str_detect(text, fixed("MR. CHRISTOPHER DEANS: ")) ~ str_replace(text, fixed("MR. CHRISTOPHER DEANS: "), "MR. CHRISTOPHER DIANA: "), # context indicates last name of "DEANS" was typo for "DIANA" (appears nowhere else in testimony)
     day == 27 & page >= 13 & page <= 18 & str_detect(text, fixed("MR. GORDON CAMPBELL: ")) ~ str_replace(text, fixed("MR. GORDON CAMPBELL: "), "MR. GORDON CAMERON: "), # context indicates last name of "CAMPBELL" was typo for "CAMERON" (appears nowhere else in testimony)
+    day == 30 & page >= 323 & page <= 328 & str_detect(text, "^[0-9]{1,2} ` ") ~ str_remove(text, fixed("` ")), # speaker attribution lines have a "` " at the start
     TRUE ~ text
   )) %>%
   group_by(day, page) %>%
