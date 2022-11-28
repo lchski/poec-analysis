@@ -123,6 +123,8 @@ lines <- lines_raw %>%
       line_id == "01-103-03" & text == "1 ÉTIENNE LACOMBE" ~ "section_header", # multi-line section header, per debugging/unexpected-testimony-line-type
       line_id == "01-109-08" & text == "6 GOVERNMENT IN RELATIONS TO THE EMERGENCIES ACT PRESENTED BY MR." ~ "section_header", # multi-line section header, per debugging/unexpected-testimony-line-type
       line_id == "01-109-09" & text == "7 ÉTIENNE LACOMBE" ~ "section_header", # multi-line section header, per debugging/unexpected-testimony-line-type
+      line_id == "26-101-08" & text == "6 And Plan B:" ~ "other",
+      line_id == "08-037-25" & text == "23 line:" ~ "other",
       TRUE ~ line_type
     ),
     line_type = case_when(
