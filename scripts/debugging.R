@@ -16,10 +16,14 @@ rm(end_lines)
 
 
 
-# ==== Check for possibly missed names ====
+# ==== Check for possibly missed speaker names (speaker_start) ====
+# We expect there'll be at least *some* responsive lines here, but a direct read
+# (or in context, e.g., line `28-197-09`) should indicate whether it’s actually a
+# missed speaker_start or not.
 lines %>%
   filter(line_type == "testimony") %>%
-  filter(str_detect(text, "[A-Z]{3,} ?:"))
+  filter(str_detect(text, "[A-Z]{3,} ?:")) %>%
+  write_csv("data/out/possible-speaker-lines.csv")
 
 
 
