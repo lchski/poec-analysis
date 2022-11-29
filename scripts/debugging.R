@@ -34,6 +34,23 @@ lines %>%
 
 
 
+# ==== Find possible misattributions (witness on multiple days with low counts) ====
+witnesses_with_multiple_days_of_testimony <- testimony_with_combined_interjections %>%
+  count(speaker_standardized, day) %>%
+  count(speaker_standardized) %>%
+  filter(n > 1) %>%
+  left_join(speaker_annotations %>% select(speaker_standardized, speaker_group)) %>%
+  filter(speaker_group == "witness") %>%
+  pull(speaker_standardized)
+
+testimony_with_combined_interjections %>%
+  count(speaker_standardized, day) %>%
+  filter(speaker_standardized %in% witnesses_with_multiple_days_of_testimony)
+
+rm(witnesses_with_multiple_days_of_testimony)
+
+
+
 # ==== Find non-speech lines followed by non-speaker_start lines ====
 # After a heading, or time marker, etc, the speaker should always be identified
 unexpected_line_type_following_non_speech <- testimony %>%
