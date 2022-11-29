@@ -89,6 +89,9 @@ lines <- lines_raw %>%
     day == 6 & page >= 117 & page <= 126 & str_detect(text, fixed("MR. CHRISTOPHER DEANS: ")) ~ str_replace(text, fixed("MR. CHRISTOPHER DEANS: "), "MR. CHRISTOPHER DIANA: "), # context indicates last name of "DEANS" was typo for "DIANA" (appears nowhere else in testimony)
     day == 27 & page >= 13 & page <= 18 & str_detect(text, fixed("MR. GORDON CAMPBELL: ")) ~ str_replace(text, fixed("MR. GORDON CAMPBELL: "), "MR. GORDON CAMERON: "), # context indicates last name of "CAMPBELL" was typo for "CAMERON" (appears nowhere else in testimony)
     day == 30 & page >= 323 & page <= 328 & str_detect(text, "^[0-9]{1,2} ` ") ~ str_remove(text, fixed("` ")), # speaker attribution lines have a "` " at the start
+    line_id == "20-034-04" & text == "2 ] MAYOR JIMMY WILLETT: This is my understanding of" ~ str_remove(text, fixed("] ")), # erroneous "]" in speaker line
+    line_id == "28-168-20" & text == "18 MINISTER MARCO MENDICINO: I think that’s fair," ~ "18 MINISTER MARCO MENDICINO: I think that’s fair, yes.", # see next correction, of line 28-168-21
+    line_id == "28-168-21" & text == "19 yes. MS. CARA ZWIBEL: Okay, thank you." ~ "19 MS. CARA ZWIBEL: Okay, thank you.", # "yes" from previous line (28-168-20) cuts into this one (see also previous correction, adding the "yes" to the previous line)
     TRUE ~ text
   )) %>%
   group_by(day, page) %>%
@@ -125,6 +128,8 @@ lines <- lines_raw %>%
       line_id == "01-109-09" & text == "7 ÉTIENNE LACOMBE" ~ "section_header", # multi-line section header, per debugging/unexpected-testimony-line-type
       line_id == "26-101-08" & text == "6 And Plan B:" ~ "other",
       line_id == "08-037-25" & text == "23 line:" ~ "other",
+      line_id == "14-220-21" & text == "19 Ms. JESSICA BARROW: And you had testified that" ~ "speaker_start", # "Ms." instead of "MS." threw off the parser
+      line_id == "14-220-27" & text == "25 Ms. JESSICA BARROW: Okay. Thank you." ~ "speaker_start", # "Ms." instead of "MS." threw off the parser
       TRUE ~ line_type
     ),
     line_type = case_when(

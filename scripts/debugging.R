@@ -16,6 +16,13 @@ rm(end_lines)
 
 
 
+# ==== Check for possibly missed names ====
+lines %>%
+  filter(line_type == "testimony") %>%
+  filter(str_detect(text, "[A-Z]{3,} ?:"))
+
+
+
 # ==== Confirm there are no duplicate names (typos, title inconsistencies etc) ====
 lines %>%
   count(speaker_standardized) %>%
