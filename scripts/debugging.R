@@ -51,6 +51,19 @@ rm(witnesses_with_multiple_days_of_testimony)
 
 
 
+# ==== Find possible misattributions (same speaker twice in a row in combined testimony) ====
+testimony_with_combined_interjections %>%
+  mutate(
+    next_speaker_standardized = lead(speaker_standardized),
+    next_line_id = lead(line_id)
+  ) %>%
+  filter(speaker_standardized == next_speaker_standardized) %>%
+  select(interjection_id, line_type, speaker_standardized, next_speaker_standardized, text_clean_combined, line_id, next_line_id) %>%
+  write_csv("data/out/possible-speaker-misattributions-double-speaker.csv")
+
+
+
+
 # ==== Find non-speech lines followed by non-speaker_start lines ====
 # After a heading, or time marker, etc, the speaker should always be identified
 unexpected_line_type_following_non_speech <- testimony %>%
