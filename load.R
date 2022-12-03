@@ -70,7 +70,7 @@ lines <- lines_raw %>%
     line_id = str_glue("{str_pad(day, 2, 'left', '0')}-{str_pad(page, 3, 'left', '0')}-{str_pad(line, 2, 'left', '0')}"),
     page_type = case_when(
       line == 1 & text == "Public Hearing Audience publique" ~ "title",
-      line == 1 & str_detect(text, "^[0-9]{1,3}") ~ "testimony",
+      line == 1 & str_detect(text, "^(?: ?ROUNDTABLE DISCUSSION )?[0-9]{1,3}") ~ "testimony",
       line == 1 & str_detect(text, "^[IV]{1,3}") ~ "front_matter",
       line == 1 ~ "other",
       TRUE ~ NA_character_
@@ -86,6 +86,7 @@ lines <- lines_raw %>%
     line_id == "05-295-18" & text == "16 Good evening, sir, my name is Alan Honner and I’m" ~ "16 MR. ALAN HONNER: Good evening, sir, my name is Alan Honner and I’m", # missing speaker intro, per debugging/unexpected-testimony-line-type
     line_id == "15-197-12" & text == "10 Mr. Marazzo, Tom Curry for former Chief Sloly." ~ "10 MR. TOM CURRY: Mr. Marazzo, Tom Curry for former Chief Sloly.", # missing speaker intro, per debugging/unexpected-testimony-line-type
     line_id == "16-359-26" & text == "24 --- Upon recessing at 7:32 p.m." ~ "24 --- Upon adjourning at 7:32 p.m.", # transcript reads "recessing" but context indicates it's adjournment (it was a late night!)
+    line_id == "32-183-12" & text == "10 --- Upon recessing at 4:59 p.m." ~ "10 --- Upon adjourning at 4:59 p.m.", # last time_marker of day, context indicates adjournment
     day == 6 & page >= 117 & page <= 126 & str_detect(text, fixed("MR. CHRISTOPHER DEANS: ")) ~ str_replace(text, fixed("MR. CHRISTOPHER DEANS: "), "MR. CHRISTOPHER DIANA: "), # context indicates last name of "DEANS" was typo for "DIANA" (appears nowhere else in testimony)
     day == 27 & page >= 13 & page <= 18 & str_detect(text, fixed("MR. GORDON CAMPBELL: ")) ~ str_replace(text, fixed("MR. GORDON CAMPBELL: "), "MR. GORDON CAMERON: "), # context indicates last name of "CAMPBELL" was typo for "CAMERON" (appears nowhere else in testimony)
     day == 30 & page >= 323 & page <= 328 & str_detect(text, "^[0-9]{1,2} ` ") ~ str_remove(text, fixed("` ")), # speaker attribution lines have a "` " at the start
@@ -105,7 +106,7 @@ lines <- lines_raw %>%
       str_detect(text, "^[0-9]{1,2} ---? ?Upon adjourning") ~ "proceedings_end",
       str_detect(text, "^[0-9]{1,2} ---? ?Upon") ~ "time_marker",
       str_detect(text, "^[0-9]{1,2} --- [A-Z]") ~ "section_header",
-      str_detect(text, "^[0-9]{1,2} [A-ZÈÉ\\.eci/ \\-'’(?:van)(?:den)(?:Mme)(?:Del)]*:") ~ "speaker_start",
+      str_detect(text, "^[0-9]{1,2} [A-ZÈÉÇ\\.eci/ \\-'’(?:van)(?:den)(?:Mme)(?:Del)]*:") ~ "speaker_start",
       TRUE ~ "other"
     ),
     line_type = case_when(# corrections based on errors found during speaker standardization
@@ -126,6 +127,12 @@ lines <- lines_raw %>%
       line_id == "01-103-03" & text == "1 ÉTIENNE LACOMBE" ~ "section_header", # multi-line section header, per debugging/unexpected-testimony-line-type
       line_id == "01-109-08" & text == "6 GOVERNMENT IN RELATIONS TO THE EMERGENCIES ACT PRESENTED BY MR." ~ "section_header", # multi-line section header, per debugging/unexpected-testimony-line-type
       line_id == "01-109-09" & text == "7 ÉTIENNE LACOMBE" ~ "section_header", # multi-line section header, per debugging/unexpected-testimony-line-type
+      line_id == "35-102-04" & text == "2 PROTESTS AND EMERGENCIES:" ~ "section_header", # multi-line section header, per debugging/speaker_standardized_count
+      line_id == "34-007-19" & text == "17 EMERGENCIES:" ~ "section_header", # multi-line section header, per debugging/speaker_standardized_count
+      line_id == "32-009-26" & text == "25 STAKE IN PUBLIC PROTESTS, AND THEIR LIMITS" ~ "section_header", # multi-line section header, per debugging/unexpected-testimony-line-type
+      line_id == "32-092-22" & text == "19 FINANCIAL INTELLIGENCE" ~ "section_header", # multi-line section header, per debugging/unexpected-testimony-line-type
+      line_id == "33-007-20" & text == "19 THE ROLE OF SOCIAL MEDIA" ~ "section_header", # multi-line section header, per debugging/unexpected-testimony-line-type
+      line_id == "33-091-05" & text == "2 GOODS AND SERVICES, CRITICAL INFRASTRUCTURE AND TRADE CORRIDORS" ~ "section_header", # multi-line section header, per debugging/unexpected-testimony-line-type
       line_id == "26-101-08" & text == "6 And Plan B:" ~ "other",
       line_id == "08-037-25" & text == "23 line:" ~ "other",
       line_id == "14-220-21" & text == "19 Ms. JESSICA BARROW: And you had testified that" ~ "speaker_start", # "Ms." instead of "MS." threw off the parser
@@ -240,7 +247,19 @@ lines <- lines_raw %>%
       "the register|^jason theriault$" = "the registrar",
       "tom mcrae" = "thomas mcrae",
       "^st-pierre$" = "nicolas st-pierre",
-      "supt\\. bernier" = "supt. robert bernier"
+      "supt\\. bernier" = "supt. robert bernier",
+      "chief jum ramer" = "chief jim ramer",
+      "^christian leuprecht$|dr\\. christian leuprecht" = "prof. christian leuprecht",
+      "dr\\. dax d'orazio" = "dr. dax d’orazio",
+      "dr\\. denis baker" = "dr. dennis baker",
+      "^david morin$" = "dr. david morin",
+      "dr\\. jocelyn stacy" = "dr. jocelyn stacey",
+      "dr\\. jack lindsay|^jack lindsay$" = "prof. jack lindsay", # https://www.brandonu.ca/ades/faculty-and-staff/
+      "michael willams" = "michael williams",
+      "patrick lelond" = "patrick leblond",
+      "^richard moon$" = "prof. richard moon",
+      "prof\\. vanessa macdonnell" = "dr. vanessa macdonnell",
+      "dr\\. jean-francois gaudreault-desbiens" = "prof. jean-françois gaudreault-desbiens"
     ))
   ) %>%
   mutate(
