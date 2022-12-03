@@ -1,4 +1,4 @@
-day,transcript_court_reporter
+day,transcript_court_reporter,proceeding_phase
 1,Dale Waterman
 2,Maxime Roussy
 3,Sandrine Martineau-Lupien
@@ -30,3 +30,8 @@ day,transcript_court_reporter
 29,Mitchell Kersys
 30,Wendy Clements
 31,Sean Prouse
+32,Sandrine Martineau-Lupien,policy
+33,Sandrine Martineau-Lupien,policy
+34,Mitchell Kersys,policy
+35,Wendy Clements,policy
+36,Mitchell Kersys,policy

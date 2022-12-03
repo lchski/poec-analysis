@@ -27,7 +27,10 @@ testimony_for_web %>%
 
 
 proceedings %>%
-  left_join(read_csv("data/indices/proceeding-court-reporters.csv"), by = "day") %>%
+  left_join(
+    read_csv("data/indices/proceeding-annotations.csv") %>%
+      mutate(proceeding_phase = replace_na(proceeding_phase, "factual")),
+    by = "day") %>%
   left_join((# add details about each day's testimony (number of pages, speakers, etc), TODO: add words etc
     testimony_for_web %>%
       group_by(day) %>%
