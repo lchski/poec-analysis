@@ -27,6 +27,16 @@ lines %>%
 
 
 
+# ==== Identify speakers we haven't annotated yet ====
+lines %>%
+  count(speaker_standardized) %>%
+  left_join(speaker_annotations) %>%
+  filter(is.na(speaker_proper)) %>%
+  select(speaker_standardized) %>%
+  write_csv("data/out/unannotated-speakers.csv")
+
+
+
 # ==== Confirm there are no duplicate names (typos, title inconsistencies etc) ====
 lines %>%
   count(speaker_standardized) %>%
