@@ -74,7 +74,7 @@ unexpected_line_type_following_non_speech <- testimony %>%
 
 unexpected_line_type_following_non_speech %>%
   filter(next_line_type == "testimony", ! is.na(next_text_clean)) %>%
-  write_csv("data/out/unexpected-testimony-line-type.csv")
+  write_csv("data/out/unexpected-testimony-line-type.csv") # expect 0 entries if all good
 
 # When non-speech is followed by non-speech - all good.
 # When non-speech is followed immediately by testimony - likely problem. (Usually, multi-line section_header. Sometimes, speaker ID is missing from original transcript.)
