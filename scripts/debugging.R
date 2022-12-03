@@ -23,7 +23,7 @@ rm(end_lines)
 lines %>%
   filter(line_type == "testimony") %>%
   filter(str_detect(text, "[A-Z]{3,} ?:")) %>%
-  write_csv("data/out/possible-speaker-lines.csv")
+  write_csv("data/out/possible-speaker-lines.csv") # as of 2022-12-03 (all public hearings loaded), 12 lines, all of them expected
 
 
 
