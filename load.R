@@ -133,6 +133,7 @@ lines <- lines_raw %>%
       line_id == "32-092-22" & text == "19 FINANCIAL INTELLIGENCE" ~ "section_header", # multi-line section header, per debugging/unexpected-testimony-line-type
       line_id == "33-007-20" & text == "19 THE ROLE OF SOCIAL MEDIA" ~ "section_header", # multi-line section header, per debugging/unexpected-testimony-line-type
       line_id == "33-091-05" & text == "2 GOODS AND SERVICES, CRITICAL INFRASTRUCTURE AND TRADE CORRIDORS" ~ "section_header", # multi-line section header, per debugging/unexpected-testimony-line-type
+      line_id == "36-007-18" & text == "17 UNDER THE EMERGENCIES ACT:" ~ "section_header", # multi-line section header, per debugging/speaker_standardized_count
       line_id == "26-101-08" & text == "6 And Plan B:" ~ "other",
       line_id == "08-037-25" & text == "23 line:" ~ "other",
       line_id == "14-220-21" & text == "19 Ms. JESSICA BARROW: And you had testified that" ~ "speaker_start", # "Ms." instead of "MS." threw off the parser
@@ -259,7 +260,9 @@ lines <- lines_raw %>%
       "patrick lelond" = "patrick leblond",
       "^richard moon$" = "prof. richard moon",
       "prof\\. vanessa macdonnell" = "dr. vanessa macdonnell",
-      "dr\\. jean-francois gaudreault-desbiens" = "prof. jean-françois gaudreault-desbiens"
+      "dr\\. jean-francois gaudreault-desbiens" = "prof. jean-françois gaudreault-desbiens",
+      "dr\\. nomi clair lazar" = "dr. nomi claire lazar",
+      "dr\\. victor ramaj" = "dr. victor v. ramraj"
     ))
   ) %>%
   mutate(
