@@ -349,12 +349,4 @@ testimony_with_combined_interjections %>%
 
 # TODO idea: filter out is.na(text_clean) ? when it's testimony only, maybe?
 
-
-# TODO idea: speaker type, counsel, lawyer, admin, witness (based on TOC entries?)
-
-
 # time type: recessing, resuming, breaking, adjourning at ... 
-
-
-
-# TODO: speaker errors, "line", "and plan b"
