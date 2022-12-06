@@ -5,6 +5,13 @@ library(pdftools)
 library(lubridate)
 library(rvest)
 
+# Download / update raw data in `data/source/` (transcripts and raw lines of text):
+# source("scripts/refresh-pdf-data.R")
+
+transcripts <- read_csv("data/source/transcripts.csv")
+
+lines_raw <- read_csv("data/source/lines-raw.csv")
+
 speaker_annotations <- read_csv("data/indices/speakers-standardized-annotations.csv") %>%
   separate(speaker_title, into = c("speaker_title", "speaker_title_abbr"), sep = "\\(", fill = "right") %>%
   mutate(
@@ -16,53 +23,6 @@ speaker_annotations <- read_csv("data/indices/speakers-standardized-annotations.
     speaker_affiliation = str_squish(speaker_affiliation),
     speaker_affiliation_abbr = str_remove(speaker_affiliation_abbr, "\\)$")
   )
-
-
-proceeding_links <- read_html("https://publicorderemergencycommission.ca/public-hearings/") %>%
-  html_elements(xpath = "//a[starts-with(@href, 'https://publicorderemergencycommission.ca/public-hearings/day')]")
-
-proceedings <- tibble(
-  url = proceeding_links %>% html_attr("href"),
-  text = proceeding_links %>% html_text2()
-) %>%
-  extract(text, c("day", "date_raw"), regex = "Day ([0-9]{1,2}) - ([A-Za-z]* [0-9]{1,2}, [0-9]{4})", convert = TRUE) %>%
-  mutate(date = mdy(date_raw)) %>%
-  filter(! is.na(date)) %>%
-  mutate(
-    transcript_filename = str_glue("POEC-Public-Hearings-Volume-{day}-{date_raw %>% str_remove_all(., ',') %>% str_replace_all(., ' ', '-')}.pdf"),
-    transcript_url = str_glue("https://publicorderemergencycommission.ca/files/documents/Transcripts/{transcript_filename}")
-  )
-
-rm(proceeding_links)
-
-transcripts_raw <- proceedings %>%
-  filter(date != today()) %>% # transcripts aren't ready day-of (understandably!)
-  select(day, date, transcript_url) %>%
-  mutate(transcript = map(transcript_url, pdf_text))
-
-transcripts <- transcripts_raw %>%
-  select(-transcript_url, -date) %>%
-  group_by(day) %>%
-  unnest(c(transcript)) %>%
-  mutate(page = row_number()) %>%
-  select(day, page, transcript)
-
-lines_raw <- transcripts %>%
-  mutate(text = str_split(transcript, "\\n")) %>%
-  group_by(day, page) %>%
-  unnest(c(text)) %>%
-  select(-transcript) %>%
-  mutate(text = str_squish(text)) %>%
-  filter(text != "") %>%
-  mutate(line = row_number()) %>%
-  ungroup() %>%
-  select(day, page, line, text)
-
-transcripts %>%
-  write_csv("data/out/transcripts.csv")
-
-lines_raw %>%
-  write_csv("data/out/lines-raw.csv")
 
 lines <- lines_raw %>%
   arrange(day, page, line) %>%
