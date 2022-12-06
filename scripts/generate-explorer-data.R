@@ -49,6 +49,11 @@ proceedings %>%
           .x %>%
             filter(speaker_group == "witness") %>%
             nrow()
+        )),
+        n_experts = map_int(speakers, ~ (
+          .x %>%
+            filter(speaker_group == "expert") %>%
+            nrow()
         ))
       )
   )) %>%
