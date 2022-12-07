@@ -26,7 +26,7 @@ testimony_for_web %>%
 
 
 
-proceedings %>%
+read_csv("data/source/proceedings.csv") %>%
   left_join(
     read_csv("data/indices/proceeding-annotations.csv") %>%
       mutate(proceeding_phase = replace_na(proceeding_phase, "factual")),

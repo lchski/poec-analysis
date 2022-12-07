@@ -22,6 +22,9 @@ proceedings <- tibble(
 
 rm(proceeding_links)
 
+proceedings %>%
+  write_csv("data/source/proceedings.csv")
+
 transcripts_raw <- proceedings %>%
   filter(date != today()) %>% # transcripts aren't ready day-of (understandably!)
   select(day, date, transcript_url) %>%
